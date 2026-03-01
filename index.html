@@ -1,54 +1,48 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>SPOKEN</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>SPOKEN</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-  <h1>SPOKEN</h1>
-  <p class="subtitle">대화를 소설용 텍스트로 정리해주는 도구</p>
 
-  <textarea id="inputText" placeholder="대화 내용을 붙여넣으세요..."></textarea>
+<h1>SPOKEN</h1>
+<p class="subtitle">대화를 소설용 텍스트로 정리해주는 도구</p>
 
-  <div class="option-group">
-    <h3>출력 설정</h3>
-    <label>
-      <input type="checkbox" id="showSpeaker">
-      이름 포함하기
-    </label>
+<div class="platform-select">
+  <button class="toggle active" data-platform="kakao">카카오톡</button>
+  <button class="toggle" data-platform="twitter">트위터</button>
+  <button class="toggle" data-platform="roll20">Roll20</button>
+</div>
 
-    <div class="sub-options">
-      <label>
-        <input type="checkbox" id="colorSpeaker">
-        이름 색상 구분
-      </label>
+<textarea id="inputText" placeholder="대화 내용을 붙여넣으세요..."></textarea>
 
-      <label>
-        <input type="checkbox" id="compressLines">
-        같은 사람 대사 줄 합치기
-      </label>
-    </div>
+<div class="option-group">
+  <h3>이름 설정</h3>
+
+  <button class="toggle" id="showSpeaker">이름 포함</button>
+
+  <div class="sub-options">
+    <button class="toggle" id="colorSpeaker">이름 색상 구분</button>
+    <button class="toggle" id="compressLines">같은 사람 대사 줄 합치기</button>
   </div>
+</div>
 
-  <div class="option-group">
-    <h3>텍스트 정리</h3>
-    <label><input type="checkbox" id="removeTime" checked> 시간 제거</label>
-    <label><input type="checkbox" id="removeLaugh" checked> 감정표현 제거 (ㅋㅋ, ㅎㅎ, ㅜㅜ, ㅠㅠ 등)</label>
-    <label><input type="checkbox" id="removeEmoji" checked> 이모지 제거</label>
-  </div>
+<div class="option-group">
+  <h3>텍스트 정리</h3>
+  <button class="toggle active" id="removeTime">시간 제거</button>
+  <button class="toggle active" id="removeLaugh">감정표현 제거</button>
+  <button class="toggle active" id="removeEmoji">이모지 제거</button>
+</div>
 
-  <button onclick="cleanText()">정리하기</button>
+<button class="main-btn" onclick="cleanText()">정리하기</button>
 
-  <div id="output"></div>
+<div id="output"></div>
 
-  <div class="actions">
-    <button onclick="copyText()">복사</button>
-    <button onclick="downloadTxt()">TXT 다운로드</button>
-  </div>
 </div>
 
 <script src="script.js"></script>
