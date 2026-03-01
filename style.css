@@ -8,19 +8,10 @@ body {
   max-width: 720px;
   margin: 0 auto;
   padding: 24px;
-  display: flex;
-  flex-direction: column;
 }
 
-h1 {
+h1, .subtitle {
   text-align: center;
-  margin-bottom: 4px;
-}
-
-.subtitle {
-  text-align: center;
-  color: #777;
-  margin-bottom: 20px;
 }
 
 textarea {
@@ -29,59 +20,59 @@ textarea {
   padding: 12px;
   border-radius: 12px;
   border: 1px solid #ddd;
-  resize: vertical;
+  margin: 20px 0;
   box-sizing: border-box;
-  margin-bottom: 20px;
 }
 
 .option-group {
-  background: #ffffff;
-  padding: 14px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  border: 1px solid #eee;
+  margin-bottom: 20px;
 }
 
 .option-group h3 {
-  margin-top: 0;
+  margin-bottom: 8px;
   font-size: 14px;
   color: #555;
 }
 
-.option-group label {
-  display: block;
-  margin-bottom: 8px;
+.platform-select {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.toggle {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #ffb6e6;
+  background: white;
+  cursor: pointer;
+}
+
+.toggle.active {
+  background: #ffb6e6;
+  color: white;
 }
 
 .sub-options {
-  margin-left: 16px;
-  opacity: 0.9;
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-button {
-  padding: 10px;
-  border-radius: 8px;
+.main-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
   border: none;
-  background: #ffb6e6;
+  background: #ff69b4;
+  color: white;
+  font-size: 16px;
   cursor: pointer;
-  margin-bottom: 16px;
 }
 
 #output {
   margin-top: 20px;
   white-space: pre-wrap;
-}
-
-.message {
-  margin-bottom: 6px;
-}
-
-.speaker-0 { color: #d63384; }
-.speaker-1 { color: #6f42c1; }
-.speaker-2 { color: #198754; }
-.speaker-3 { color: #0d6efd; }
-
-.actions {
-  display: flex;
-  gap: 10px;
 }
