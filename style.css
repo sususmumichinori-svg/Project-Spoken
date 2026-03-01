@@ -1,0 +1,96 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: linear-gradient(180deg,#fff0f6,#f3f0ff);
+}
+
+.wrap {
+  max-width: 720px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+h1 {
+  text-align: center;
+  color: #d63384;
+  margin-bottom: 10px;
+}
+
+.intro {
+  text-align: center;
+  color: #777;
+  margin-bottom: 25px;
+}
+
+textarea {
+  width: 100%;
+  height: 160px;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  resize: none;
+  margin-bottom: 20px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #e599f7;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+#resultArea {
+  margin-top: 40px;
+}
+
+#output {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 말풍선 */
+
+.bubble {
+  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.left {
+  background: #ffe3f3;
+  align-self: flex-start;
+}
+
+.right {
+  background: #e5dbff;
+  align-self: flex-end;
+}
+
+.name {
+  font-size: 12px;
+  margin-bottom: 4px;
+  opacity: 0.7;
+}
