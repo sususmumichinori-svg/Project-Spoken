@@ -2,77 +2,55 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <title>SPOKEN</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>대화정리기 v.1.0.0</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-  <h1>대화정리기 v.1.0.0</h1>
+  <h1>SPOKEN</h1>
+  <p class="subtitle">대화를 소설용 텍스트로 정리해주는 도구</p>
 
-<div class="intro">
-  복잡한 채팅 로그를 깔끔하게 정리해주는 대화 정리 도구입니다.<br/>
-  이름 제거, 시간 삭제, 같은 사람 대사 합치기 등을 지원합니다.<br/>
-  🩷대화내용은 어디에도 저장되지 않습니다.🩷<br/>
-</div>
-
-  <textarea id="inputText" placeholder="대화를 붙여넣으세요"></textarea>
+  <textarea id="inputText" placeholder="대화 내용을 붙여넣으세요..."></textarea>
 
   <div class="option-group">
-    <div class="option-title">이름 설정</div>
-
-    <label class="toggle">
-      <input type="checkbox" id="showSpeaker" checked>
-      <span>이름 유지</span>
+    <h3>출력 설정</h3>
+    <label>
+      <input type="checkbox" id="showSpeaker">
+      이름 포함하기
     </label>
 
-    <label class="toggle">
-      <input type="checkbox" id="colorSpeaker">
-      <span>이름 색상 구분</span>
-    </label>
+    <div class="sub-options">
+      <label>
+        <input type="checkbox" id="colorSpeaker">
+        이름 색상 구분
+      </label>
+
+      <label>
+        <input type="checkbox" id="compressLines">
+        같은 사람 대사 줄 합치기
+      </label>
+    </div>
   </div>
 
   <div class="option-group">
-    <div class="option-title">정리 옵션</div>
-
-    <label class="toggle">
-      <input type="checkbox" id="removeTime">
-      <span>시간 제거</span>
-    </label>
-
-    <label class="toggle">
-      <input type="checkbox" id="removeLaugh">
-      <span>ㅋㅋ/ㅎㅎ/ㅠㅠ 제거</span>
-    </label>
-
-    <label class="toggle">
-      <input type="checkbox" id="removeEmoji">
-      <span>이모지 제거</span>
-    </label>
-
-    <label class="toggle">
-      <input type="checkbox" id="compressLines">
-      <span>같은 사람 대사 합치기</span>
-    </label>
+    <h3>텍스트 정리</h3>
+    <label><input type="checkbox" id="removeTime" checked> 시간 제거</label>
+    <label><input type="checkbox" id="removeLaugh" checked> 감정표현 제거 (ㅋㅋ, ㅎㅎ, ㅜㅜ, ㅠㅠ 등)</label>
+    <label><input type="checkbox" id="removeEmoji" checked> 이모지 제거</label>
   </div>
 
   <button onclick="cleanText()">정리하기</button>
-  <button class="sub-btn" onclick="copyText()">복사</button>
-  <button class="sub-btn" onclick="downloadTxt()">TXT 파일로 내보내기</button>
 
   <div id="output"></div>
-</div>
 
-<footer class="footer">
-  <div>🩷대화내용은 어디에도 저장되지 않습니다.🩷</div>
-  <div>Built by @shokolabo · v1.0.0</div>
-</footer>
+  <div class="actions">
+    <button onclick="copyText()">복사</button>
+    <button onclick="downloadTxt()">TXT 다운로드</button>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>
-
 </html>
-
-
-
