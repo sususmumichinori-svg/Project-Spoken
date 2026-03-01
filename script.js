@@ -1,130 +1,171 @@
-// 🔥 패턴 클래스 (여기서 예외 대응 가능)
+// ==========================
+// 🔥 PARSER PATTERNS
+// ==========================
 const PARSER_PATTERNS = [
-  {
-    type: "bracketName",
-    regex: /^\[([^\]]+)\]\s*(.*)/
-  },
-  {
-    type: "mention",
-    regex: /^@(\w+)\s+(.*)/
-  },
-  {
-    type: "colon",
-    regex: /^([^:]+)\s*:\s*(.*)/
-  },
-  {
-    type: "role",
-    regex: /^([^\s]+)\)\s*(.*)/
-  }
+  { type: "bracketName", regex: /^\[([^\]]+)\]\s*(.*)/ },
+  { type: "mention", regex: /^@(\w+)\s+(.*)/ },
+  { type: "colon", regex: /^([^:]+)\s*:\s*(.*)/ },
+  { type: "role", regex: /^([^\s]+)\)\s*(.*)/ }
 ];
 
-function parseLine(line) {
-  for (let pattern of PARSER_PATTERNS) {
-    const match = line.match(pattern.regex);
-    if (match) {
-      return {
-        type: pattern.type,
-        name: match[1].trim(),
-        content: match[2].trim()
-      };
-    }
+// ==========================
+// 🔥 ChatParser CLASS
+// ==========================
+class ChatParser {
+  constructor(options) {
+    this.options = options;
+    this.lastSpeaker = null;
   }
-  return null;
+
+  cleanLine(line) {
+    if (this.options.removeTime) {
+      line = line.replace(/(오전|오후)?\s*\d{1,2}:\d{2}/g, "");
+    }
+
+    if (this.options.removeLaugh) {
+      line = line.replace(/ㅋ+|ㅎ+/g, "");
+    }
+
+    if (this.options.removeEmoji) {
+      line = line.replace(/[\u2600-\u27BF\u{1F300}-\u{1F6FF}]/gu, "");
+    }
+
+    return line.trim();
+  }
+
+  parseLine(line) {
+    for (let pattern of PARSER_PATTERNS) {
+      const match = line.match(pattern.regex);
+      if (match) {
+        return {
+          name: match[1].trim(),
+          content: match[2].trim()
+        };
+      }
+    }
+    return null;
+  }
+
+  process(text) {
+    const lines = text.split("\n");
+    const result = [];
+
+    for (let raw of lines) {
+      let line = this.cleanLine(raw);
+      if (!line) continue;
+
+      const parsed = this.parseLine(line);
+
+      if (parsed) {
+        const { name, content } = parsed;
+
+        if (
+          this.options.compressLines &&
+          name === this.lastSpeaker &&
+          result.length > 0
+        ) {
+          result[result.length - 1].content += " " + content;
+        } else {
+          result.push({ name, content });
+          this.lastSpeaker = name;
+        }
+      } else {
+        if (
+          this.options.compressLines &&
+          result.length > 0 &&
+          result[result.length - 1].name === null
+        ) {
+          result[result.length - 1].content += " " + line;
+        } else {
+          result.push({ name: null, content: line });
+        }
+      }
+    }
+
+    return result;
+  }
 }
 
+// ==========================
+// 🔥 UI CONTROLLER
+// ==========================
 function cleanText() {
   const input = document.getElementById("inputText").value;
 
-  const showSpeaker = document.getElementById("showSpeaker").checked;
-  const colorSpeaker = document.getElementById("colorSpeaker").checked;
-  const removeTime = document.getElementById("removeTime").checked;
-  const removeLaugh = document.getElementById("removeLaugh").checked;
-  const removeEmoji = document.getElementById("removeEmoji").checked;
-  const compressLines = document.getElementById("compressLines").checked;
+  const options = {
+    showSpeaker: document.getElementById("showSpeaker").checked,
+    colorSpeaker: document.getElementById("colorSpeaker").checked,
+    removeTime: document.getElementById("removeTime").checked,
+    removeLaugh: document.getElementById("removeLaugh").checked,
+    removeEmoji: document.getElementById("removeEmoji").checked,
+    compressLines: document.getElementById("compressLines").checked
+  };
 
-  const output = document.getElementById("output");
-  output.innerHTML = "";
-
-  const speakers = {};
-  let speakerIndex = 0;
-  let lastSpeaker = null;
-  let buffer = "";
-
-  // 이름 유지 꺼지면 색상 비활성화
+  // 이름 표시 꺼지면 색상도 자동 비활성화
   const colorCheckbox = document.getElementById("colorSpeaker");
-  if (!showSpeaker) {
+  if (!options.showSpeaker) {
+    options.colorSpeaker = false;
     colorCheckbox.checked = false;
     colorCheckbox.disabled = true;
   } else {
     colorCheckbox.disabled = false;
   }
 
-  function flush() {
-    if (!buffer.trim()) return;
+  const parser = new ChatParser(options);
+  const messages = parser.process(input);
 
+  render(messages, options);
+}
+
+// ==========================
+// 🔥 RENDER FUNCTION
+// ==========================
+function render(messages, options) {
+  const output = document.getElementById("output");
+  output.innerHTML = "";
+
+  const speakerMap = {};
+  let speakerIndex = 0;
+
+  messages.forEach(msg => {
     const div = document.createElement("div");
     div.classList.add("message");
 
-    if (colorSpeaker && showSpeaker && lastSpeaker) {
-      div.classList.add("speaker-" + (speakers[lastSpeaker] % 4));
-    }
+    if (msg.name) {
+      if (!(msg.name in speakerMap)) {
+        speakerMap[msg.name] = speakerIndex++;
+      }
 
-    div.textContent = showSpeaker && lastSpeaker
-      ? lastSpeaker + ": " + buffer.trim()
-      : buffer.trim();
+      if (options.colorSpeaker) {
+        div.classList.add("speaker-" + (speakerMap[msg.name] % 4));
+      }
 
-    output.appendChild(div);
-    buffer = "";
-  }
-
-  const lines = input.split("\n");
-
-  for (let line of lines) {
-    line = line.trim();
-    if (!line) continue;
-
-    // 시간 제거 (오전/오후 포함)
-    if (removeTime) {
-      line = line.replace(/(오전|오후)?\s*\d{1,2}:\d{2}/g, "");
-    }
-
-    if (removeLaugh) line = line.replace(/ㅋ+|ㅎ+/g, "");
-    if (removeEmoji) line = line.replace(/[\u2600-\u27BF\u{1F300}-\u{1F6FF}]/gu, "");
-
-    const parsed = parseLine(line);
-
-    if (parsed) {
-      const { name, content } = parsed;
-
-      if (!(name in speakers)) speakers[name] = speakerIndex++;
-
-      if (compressLines && name === lastSpeaker) {
-        buffer += " " + content;
+      if (options.showSpeaker) {
+        div.textContent = msg.name + ": " + msg.content;
       } else {
-        flush();
-        lastSpeaker = name;
-        buffer = content;
+        div.textContent = msg.content;
       }
     } else {
-      if (compressLines) {
-        buffer += " " + line;
-      } else {
-        flush();
-        buffer = line;
-        flush();
-      }
+      div.textContent = msg.content;
     }
-  }
 
-  flush();
+    output.appendChild(div);
+  });
 }
 
+// ==========================
+// 🔥 COPY
+// ==========================
 function copyText() {
   const text = document.getElementById("output").innerText;
+  if (!text.trim()) return alert("복사할 내용이 없습니다.");
   navigator.clipboard.writeText(text);
   alert("복사되었습니다.");
 }
 
+// ==========================
+// 🔥 DOWNLOAD TXT
+// ==========================
 function downloadTxt() {
   const text = document.getElementById("output").innerText;
   if (!text.trim()) return alert("다운로드할 내용이 없습니다.");
