@@ -17,22 +17,32 @@ class ChatParser {
     this.lastSpeaker = null;
   }
 
+  // 🔥 텍스트 정제
   cleanLine(line) {
+
+    // 시간 제거 (브라켓 포함 완전 제거)
     if (this.options.removeTime) {
+      line = line.replace(/\[(오전|오후)?\s*\d{1,2}:\d{2}\]/g, "");
       line = line.replace(/(오전|오후)?\s*\d{1,2}:\d{2}/g, "");
     }
 
+    // 웃음 제거
     if (this.options.removeLaugh) {
       line = line.replace(/ㅋ+|ㅎ+/g, "");
     }
 
+    // 이모지 제거
     if (this.options.removeEmoji) {
       line = line.replace(/[\u2600-\u27BF\u{1F300}-\u{1F6FF}]/gu, "");
     }
 
+    // 🔥 남아있는 모든 대괄호 제거
+    line = line.replace(/[\[\]]/g, "");
+
     return line.trim();
   }
 
+  // 🔥 화자 파싱
   parseLine(line) {
     for (let pattern of PARSER_PATTERNS) {
       const match = line.match(pattern.regex);
@@ -43,9 +53,11 @@ class ChatParser {
         };
       }
     }
+
     return null;
   }
 
+  // 🔥 전체 처리
   process(text) {
     const lines = text.split("\n");
     const result = [];
@@ -101,8 +113,8 @@ function cleanText() {
     compressLines: document.getElementById("compressLines").checked
   };
 
-  // 이름 표시 꺼지면 색상도 자동 비활성화
   const colorCheckbox = document.getElementById("colorSpeaker");
+
   if (!options.showSpeaker) {
     options.colorSpeaker = false;
     colorCheckbox.checked = false;
@@ -118,7 +130,7 @@ function cleanText() {
 }
 
 // ==========================
-// 🔥 RENDER FUNCTION
+// 🔥 RENDER
 // ==========================
 function render(messages, options) {
   const output = document.getElementById("output");
