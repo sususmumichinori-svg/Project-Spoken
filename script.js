@@ -25,9 +25,9 @@ class ChatParser {
       line = line.replace(/(오전|오후)?\s*\d{1,2}:\d{2}/g, "");
     }
 
-    // 웃음 제거
+    // 감정표현 제거 (ㅋㅋ ㅎㅎ ㅜㅜ ㅠㅠ 등)
     if (this.options.removeLaugh) {
-      line = line.replace(/ㅋ+|ㅎ+/g, "");
+      line = line.replace(/[ㅋㅎㅜㅠ]+/g, "");
     }
 
     // 이모지 제거
@@ -192,3 +192,4 @@ function downloadTxt() {
   a.click();
   URL.revokeObjectURL(url);
 }
+
