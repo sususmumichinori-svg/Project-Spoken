@@ -17,10 +17,9 @@ class ChatParser {
     this.lastSpeaker = null;
   }
 
-  // 🔥 텍스트 정제
   cleanLine(line) {
 
-    // 시간 제거 (브라켓 포함 완전 제거)
+    // 시간 제거
     if (this.options.removeTime) {
       line = line.replace(/\[(오전|오후)?\s*\d{1,2}:\d{2}\]/g, "");
       line = line.replace(/(오전|오후)?\s*\d{1,2}:\d{2}/g, "");
@@ -36,13 +35,9 @@ class ChatParser {
       line = line.replace(/[\u2600-\u27BF\u{1F300}-\u{1F6FF}]/gu, "");
     }
 
-    // 🔥 남아있는 모든 대괄호 제거
-    line = line.replace(/[\[\]]/g, "");
-
     return line.trim();
   }
 
-  // 🔥 화자 파싱
   parseLine(line) {
     for (let pattern of PARSER_PATTERNS) {
       const match = line.match(pattern.regex);
@@ -53,11 +48,9 @@ class ChatParser {
         };
       }
     }
-
     return null;
   }
 
-  // 🔥 전체 처리
   process(text) {
     const lines = text.split("\n");
     const result = [];
@@ -69,10 +62,16 @@ class ChatParser {
       const parsed = this.parseLine(line);
 
       if (parsed) {
-        const { name, content } = parsed;
+        let { name, content } = parsed;
+
+        // 🔥 이름 제거 옵션 ON일 경우
+        if (!this.options.showSpeaker) {
+          name = null; // 이름 완전 제거
+        }
 
         if (
           this.options.compressLines &&
+          name &&
           name === this.lastSpeaker &&
           result.length > 0
         ) {
@@ -82,6 +81,13 @@ class ChatParser {
           this.lastSpeaker = name;
         }
       } else {
+
+        // 🔥 이름 제거 옵션일 때 혹시 남은 "이름:" 패턴 강제 제거
+        if (!this.options.showSpeaker) {
+          line = line.replace(/^[^:]+:\s*/, "");
+          line = line.replace(/^\[[^\]]+\]\s*/, "");
+        }
+
         if (
           this.options.compressLines &&
           result.length > 0 &&
@@ -143,7 +149,7 @@ function render(messages, options) {
     const div = document.createElement("div");
     div.classList.add("message");
 
-    if (msg.name) {
+    if (msg.name && options.showSpeaker) {
       if (!(msg.name in speakerMap)) {
         speakerMap[msg.name] = speakerIndex++;
       }
@@ -152,11 +158,7 @@ function render(messages, options) {
         div.classList.add("speaker-" + (speakerMap[msg.name] % 4));
       }
 
-      if (options.showSpeaker) {
-        div.textContent = msg.name + ": " + msg.content;
-      } else {
-        div.textContent = msg.content;
-      }
+      div.textContent = msg.name + ": " + msg.content;
     } else {
       div.textContent = msg.content;
     }
