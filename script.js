@@ -1,85 +1,139 @@
-document.getElementById("cleanBtn").addEventListener("click", function() {
+// 🔥 패턴 클래스 (여기서 예외 대응 가능)
+const PARSER_PATTERNS = [
+  {
+    type: "bracketName",
+    regex: /^\[([^\]]+)\]\s*(.*)/
+  },
+  {
+    type: "mention",
+    regex: /^@(\w+)\s+(.*)/
+  },
+  {
+    type: "colon",
+    regex: /^([^:]+)\s*:\s*(.*)/
+  },
+  {
+    type: "role",
+    regex: /^([^\s]+)\)\s*(.*)/
+  }
+];
 
+function parseLine(line) {
+  for (let pattern of PARSER_PATTERNS) {
+    const match = line.match(pattern.regex);
+    if (match) {
+      return {
+        type: pattern.type,
+        name: match[1].trim(),
+        content: match[2].trim()
+      };
+    }
+  }
+  return null;
+}
+
+function cleanText() {
   const input = document.getElementById("inputText").value;
-  const compress = document.getElementById("compress").checked;
+
+  const showSpeaker = document.getElementById("showSpeaker").checked;
+  const colorSpeaker = document.getElementById("colorSpeaker").checked;
   const removeTime = document.getElementById("removeTime").checked;
   const removeLaugh = document.getElementById("removeLaugh").checked;
+  const removeEmoji = document.getElementById("removeEmoji").checked;
+  const compressLines = document.getElementById("compressLines").checked;
 
   const output = document.getElementById("output");
   output.innerHTML = "";
 
-  if (!input.trim()) {
-    output.innerHTML = "<p>내용이 없습니다.</p>";
-    return;
-  }
-
-  const lines = input.split("\n");
-  let speakers = {};
-  let speakerOrder = [];
+  const speakers = {};
+  let speakerIndex = 0;
   let lastSpeaker = null;
   let buffer = "";
 
+  // 이름 유지 꺼지면 색상 비활성화
+  const colorCheckbox = document.getElementById("colorSpeaker");
+  if (!showSpeaker) {
+    colorCheckbox.checked = false;
+    colorCheckbox.disabled = true;
+  } else {
+    colorCheckbox.disabled = false;
+  }
+
   function flush() {
-    if (!buffer) return;
+    if (!buffer.trim()) return;
 
-    const bubble = document.createElement("div");
-    bubble.classList.add("bubble");
+    const div = document.createElement("div");
+    div.classList.add("message");
 
-    const side = speakerOrder.indexOf(lastSpeaker) % 2 === 0 ? "left" : "right";
-    bubble.classList.add(side);
+    if (colorSpeaker && showSpeaker && lastSpeaker) {
+      div.classList.add("speaker-" + (speakers[lastSpeaker] % 4));
+    }
 
-    const nameDiv = document.createElement("div");
-    nameDiv.classList.add("name");
-    nameDiv.textContent = lastSpeaker;
+    div.textContent = showSpeaker && lastSpeaker
+      ? lastSpeaker + ": " + buffer.trim()
+      : buffer.trim();
 
-    const textDiv = document.createElement("div");
-    textDiv.textContent = buffer;
-
-    bubble.appendChild(nameDiv);
-    bubble.appendChild(textDiv);
-    output.appendChild(bubble);
-
+    output.appendChild(div);
     buffer = "";
   }
 
-  for (let line of lines) {
+  const lines = input.split("\n");
 
+  for (let line of lines) {
     line = line.trim();
     if (!line) continue;
 
+    // 시간 제거 (오전/오후 포함)
     if (removeTime) {
       line = line.replace(/(오전|오후)?\s*\d{1,2}:\d{2}/g, "");
     }
 
-    if (removeLaugh) {
-      line = line.replace(/ㅋ+|ㅎ+/g, "");
-    }
+    if (removeLaugh) line = line.replace(/ㅋ+|ㅎ+/g, "");
+    if (removeEmoji) line = line.replace(/[\u2600-\u27BF\u{1F300}-\u{1F6FF}]/gu, "");
 
-    let match = line.match(/^([^:]+):\s*(.*)$/);
+    const parsed = parseLine(line);
 
-    if (match) {
-      let name = match[1].trim();
-      let text = match[2].trim();
+    if (parsed) {
+      const { name, content } = parsed;
 
-      if (!speakers[name]) {
-        speakers[name] = true;
-        speakerOrder.push(name);
-      }
+      if (!(name in speakers)) speakers[name] = speakerIndex++;
 
-      if (compress && name === lastSpeaker) {
-        buffer += " " + text;
+      if (compressLines && name === lastSpeaker) {
+        buffer += " " + content;
       } else {
         flush();
         lastSpeaker = name;
-        buffer = text;
+        buffer = content;
       }
     } else {
-      if (compress) {
+      if (compressLines) {
         buffer += " " + line;
+      } else {
+        flush();
+        buffer = line;
+        flush();
       }
     }
   }
 
   flush();
+}
 
-});
+function copyText() {
+  const text = document.getElementById("output").innerText;
+  navigator.clipboard.writeText(text);
+  alert("복사되었습니다.");
+}
+
+function downloadTxt() {
+  const text = document.getElementById("output").innerText;
+  if (!text.trim()) return alert("다운로드할 내용이 없습니다.");
+
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "SPOKEN.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
