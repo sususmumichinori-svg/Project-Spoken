@@ -9,32 +9,7 @@
 <body>
 
 <div class="container">
-  <h1>대화정리기 v1.0.0</h1>
-
-  <!-- 정리 타입 -->
-  <div class="option-group">
-    <div class="option-title">정리 타입</div>
-
-    <label class="toggle">
-      <input type="radio" name="mode" value="general" checked>
-      <span>일반 모드</span>
-    </label>
-
-    <label class="toggle">
-      <input type="radio" name="mode" value="kakao">
-      <span>카카오톡 모드</span>
-    </label>
-
-    <label class="toggle">
-      <input type="radio" name="mode" value="twitter">
-      <span>트위터 멘션 모드</span>
-    </label>
-
-    <label class="toggle">
-      <input type="radio" name="mode" value="role">
-      <span>롤방 모드</span>
-    </label>
-  </div>
+  <h1>대화정리기</h1>
 
   <textarea id="inputText" placeholder="여기에 대화를 붙여넣으세요"></textarea>
 
@@ -47,7 +22,7 @@
       <span>화자 표시</span>
     </label>
 
-    <label class="toggle">
+    <label class="toggle sub-option">
       <input type="checkbox" id="colorSpeaker">
       <span>화자 색상 구분</span>
     </label>
@@ -66,23 +41,14 @@
       <input type="checkbox" id="removeLaugh">
       <span>ㅋㅋ/ㅎㅎ 제거</span>
     </label>
-
-    <label class="toggle">
-      <input type="checkbox" id="removeEmoji">
-      <span>이모지 제거</span>
-    </label>
-
-    <label class="toggle">
-      <input type="checkbox" id="compressLines">
-      <span>자동 줄 압축</span>
-    </label>
   </div>
 
   <button onclick="cleanText()">정리하기</button>
   <button class="sub-btn" onclick="copyText()">결과 복사</button>
-  <button class="sub-btn" onclick="downloadTxt()">TXT 다운로드</button>
 
   <div id="output"></div>
+
+  <div class="version">v1.0.0</div>
 </div>
 
 <script src="script.js"></script>
