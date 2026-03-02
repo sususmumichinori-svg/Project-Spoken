@@ -72,12 +72,14 @@ button:hover {
 <body>
 
 <div class="container">
-  <h1>💗 Spoken Cleaner 💗</h1>
-
+  <h1>💗대화정리기-Spoken Cleaner v.1.0.0💗</h1>
+   <h2>입력한 내용은 어디에도 저장되지 않습니다.</h2>
+  
   <textarea id="inputText" placeholder="카카오톡 대화 복붙"></textarea>
 
   <button onclick="processText()">정리하기 ✨</button>
-
+  <button onclick="copyText()">복사하기 📋</button>
+  <button onclick="downloadTXT()">TXT 내보내기 💾</button>
   <div id="output"></div>
 </div>
 
@@ -183,3 +185,4 @@ function render(messages) {
 
 </body>
 </html>
+
