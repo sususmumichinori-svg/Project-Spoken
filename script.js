@@ -1,58 +1,73 @@
-function cleanText() {
+function processText() {
   const input = document.getElementById("inputText").value;
-  const removeTime = document.getElementById("removeTime").checked;
-  const removeLaugh = document.getElementById("removeLaugh").checked;
-  const colorSpeaker = document.getElementById("colorSpeaker").checked;
-  const removeSpeaker = document.getElementById("removeSpeaker").checked;
   const outputDiv = document.getElementById("output");
-
   outputDiv.innerHTML = "";
 
   const lines = input.split("\n");
-  const speakers = {};
-  let speakerIndex = 0;
 
-  lines.forEach(function(line) {
-    line = line.trim();
-    if (!line) return;
+  let messages = [];
+  let currentSpeaker = "";
+  let currentText = "";
 
-    // 카카오톡 날짜 제거
-    line = line.replace(/^\d{4}년.*?,\s*/, "");
-
-    if (removeTime) {
-      line = line.replace(/\d{1,2}:\d{2}/g, "");
-    }
-
-    if (removeLaugh) {
-      line = line.replace(/ㅋ+|ㅎ+/g, "");
-    }
-
-    const match = line.match(/^([^:]+)\s*:\s*(.*)/);
-    const div = document.createElement("div");
+  lines.forEach(line => {
+    const match = line.match(/,\s(.+?)\s:\s(.+)/);
 
     if (match) {
-      const name = match[1].trim();
-      const content = match[2].trim();
+      const speaker = match[1];
+      let text = cleanText(match[2]);
 
-      if (!(name in speakers)) {
-        speakers[name] = speakerIndex++;
+      if (speaker === currentSpeaker) {
+        currentText += " " + text;
+      } else {
+        if (currentText) {
+          messages.push({ speaker: currentSpeaker, text: currentText });
+        }
+        currentSpeaker = speaker;
+        currentText = text;
       }
-
-      if (colorSpeaker && !removeSpeaker) {
-        div.classList.add("speaker-" + (speakers[name] % 4));
-      }
-
-      div.textContent = removeSpeaker ? content : name + ": " + content;
-    } else {
-      div.textContent = line;
     }
+  });
+
+  if (currentText) {
+    messages.push({ speaker: currentSpeaker, text: currentText });
+  }
+
+  renderMessages(messages);
+}
+
+function cleanText(text) {
+  text = text.replace(/(ㅋ{2,}|ㅎ{2,}|ㅜ{2,}|ㅠ{2,})/g, "");
+  text = text.replace(/\s+/g, " ").trim();
+  return text;
+}
+
+function renderMessages(messages) {
+  const outputDiv = document.getElementById("output");
+
+  // 화자별 색상 매핑
+  const speakerColors = {};
+  const pastelColors = [
+    "#ffd6e8",
+    "#d6e8ff",
+    "#fff0b3",
+    "#d4ffd6",
+    "#f3d6ff",
+    "#ffe0cc"
+  ];
+
+  let colorIndex = 0;
+
+  messages.forEach(msg => {
+    if (!speakerColors[msg.speaker]) {
+      speakerColors[msg.speaker] = pastelColors[colorIndex % pastelColors.length];
+      colorIndex++;
+    }
+
+    const div = document.createElement("div");
+    div.classList.add("message");
+    div.style.backgroundColor = speakerColors[msg.speaker];
+    div.innerText = msg.text;
 
     outputDiv.appendChild(div);
   });
-}
-
-function copyText() {
-  const text = document.getElementById("output").innerText;
-  navigator.clipboard.writeText(text);
-  alert("복사되었습니다.");
 }
