@@ -1,19 +1,12 @@
-// =====================
-// Spoken Cleaner Script
-// =====================
-
 function processText() {
   const inputEl = document.getElementById("inputText");
   const outputEl = document.getElementById("output");
+  const actionEl = document.getElementById("resultActions");
 
-  if (!inputEl || !outputEl) {
-    alert("HTML 요소를 찾을 수 없습니다.");
-    return;
-  }
+  outputEl.innerHTML = "";
+  actionEl.style.display = "none";
 
   const input = inputEl.value.trim();
-  outputEl.innerHTML = "";
-
   if (!input) {
     alert("대화를 붙여넣어주세요 💬");
     return;
@@ -29,7 +22,6 @@ function processText() {
     line = line.trim();
     if (!line) return;
 
-    // [이름] [오전 1:12] 메시지 형식
     const match = line.match(/^\[(.*?)\]\s\[(.*?)\]\s?(.*)$/);
 
     if (match) {
@@ -42,16 +34,12 @@ function processText() {
         currentText += " " + text;
       } else {
         if (currentSpeaker !== null) {
-          messages.push({
-            speaker: currentSpeaker,
-            text: currentText
-          });
+          messages.push({ speaker: currentSpeaker, text: currentText });
         }
         currentSpeaker = speaker;
         currentText = text;
       }
     } else {
-      // 다음 줄이 이어지는 메시지일 경우
       if (currentSpeaker !== null) {
         currentText += " " + cleanText(line);
       }
@@ -59,10 +47,7 @@ function processText() {
   });
 
   if (currentSpeaker !== null) {
-    messages.push({
-      speaker: currentSpeaker,
-      text: currentText
-    });
+    messages.push({ speaker: currentSpeaker, text: currentText });
   }
 
   if (messages.length === 0) {
@@ -71,35 +56,23 @@ function processText() {
   }
 
   render(messages);
+  actionEl.style.display = "block";
 }
 
-
-// 감정 노이즈 제거
 function cleanText(text) {
   text = text.replace(/(ㅋ{2,}|ㅎ{2,}|ㅜ{2,}|ㅠ{2,})/g, "");
   text = text.replace(/\s+/g, " ").trim();
   return text;
 }
 
-
-// 화면에 렌더링
 function render(messages) {
   const outputEl = document.getElementById("output");
 
-  const pastelColors = [
-    "#ffd6e8",
-    "#d6e8ff",
-    "#fff0b3",
-    "#d4ffd6",
-    "#f3d6ff",
-    "#ffe0cc"
-  ];
-
+  const pastelColors = ["#ffd6e8", "#d6e8ff", "#fff0b3", "#d4ffd6", "#f3d6ff", "#ffe0cc"];
   const speakerColorMap = {};
   let colorIndex = 0;
 
   messages.forEach(msg => {
-
     if (!speakerColorMap[msg.speaker]) {
       speakerColorMap[msg.speaker] =
         pastelColors[colorIndex % pastelColors.length];
@@ -115,8 +88,6 @@ function render(messages) {
   });
 }
 
-
-// 정리된 텍스트 가져오기
 function getCleanText() {
   const messageEls = document.querySelectorAll(".message");
   let result = "";
@@ -128,39 +99,20 @@ function getCleanText() {
   return result.trim();
 }
 
-
-// 복사 기능
 function copyText() {
   const text = getCleanText();
-
-  if (!text) {
-    alert("복사할 내용이 없어요 🥲");
-    return;
-  }
+  if (!text) return alert("복사할 내용이 없어요 🥲");
 
   navigator.clipboard.writeText(text)
-    .then(() => {
-      alert("복사 완료 💗");
-    })
-    .catch(() => {
-      alert("복사 실패 😢");
-    });
+    .then(() => alert("복사 완료 💗"))
+    .catch(() => alert("복사 실패 😢"));
 }
 
-
-// TXT 다운로드
 function downloadTXT() {
   const text = getCleanText();
+  if (!text) return alert("내보낼 내용이 없어요 🥲");
 
-  if (!text) {
-    alert("내보낼 내용이 없어요 🥲");
-    return;
-  }
-
-  const blob = new Blob([text], {
-    type: "text/plain;charset=utf-8;"
-  });
-
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
@@ -168,7 +120,7 @@ function downloadTXT() {
   a.download = "spoken-cleaned.txt";
   document.body.appendChild(a);
   a.click();
-
   document.body.removeChild(a);
+
   URL.revokeObjectURL(url);
 }
