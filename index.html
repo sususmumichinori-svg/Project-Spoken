@@ -1,24 +1,185 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>Spoken - 대화정리기</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<title>Spoken Cleaner</title>
+<style>
+
+body {
+  margin: 0;
+  padding: 30px 15px;
+  font-family: "Apple SD Gothic Neo", sans-serif;
+  background: linear-gradient(135deg, #ffe6f2, #e6f0ff);
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+}
+
+h1 {
+  text-align: center;
+  color: #444;
+}
+
+textarea {
+  width: 100%;
+  height: 180px;
+  border: none;
+  border-radius: 15px;
+  padding: 15px;
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  resize: none;
+}
+
+button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border: none;
+  border-radius: 20px;
+  background: #ff9ecf;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ff7fbf;
+}
+
+#output {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  padding: 12px 15px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 85%;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+</style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>💗 대화정리기 💗</h1>
-    <p class="sub">카카오톡 대화를 깔끔하게 정리해줘요. 대화는 어디에도 저장되지 않습니다.</p>
+<div class="container">
+  <h1>💗 Spoken Cleaner 💗</h1>
 
-    <textarea id="inputText" placeholder="카카오톡 대화 복붙 ✨"></textarea>
+  <textarea id="inputText" placeholder="카카오톡 대화 복붙"></textarea>
 
-    <button onclick="processText()">정리하기 💫</button>
+  <button onclick="processText()">정리하기 ✨</button>
 
-    <div id="output"></div>
-  </div>
+  <div id="output"></div>
+</div>
 
-  <script src="script.js"></script>
+<script>
+
+function processText() {
+  const input = document.getElementById("inputText").value.trim();
+  const output = document.getElementById("output");
+  output.innerHTML = "";
+
+  if (!input) {
+    alert("대화를 붙여넣어주세요 💬");
+    return;
+  }
+
+  const lines = input.split("\n");
+
+  let messages = [];
+  let currentSpeaker = null;
+  let currentText = "";
+
+  lines.forEach(line => {
+    line = line.trim();
+    if (!line) return;
+
+    // [이름] [오전 1:12] 메시지
+    const match = line.match(/^\[(.*?)\]\s\[(.*?)\]\s?(.*)$/);
+
+    if (match) {
+      const speaker = match[1];
+      let text = match[3] || "";
+
+      text = cleanText(text);
+
+      if (speaker === currentSpeaker) {
+        currentText += " " + text;
+      } else {
+        if (currentSpeaker !== null) {
+          messages.push({ speaker: currentSpeaker, text: currentText });
+        }
+        currentSpeaker = speaker;
+        currentText = text;
+      }
+    } else {
+      // 만약 다음 줄에 이어서 메시지가 오는 경우
+      if (currentSpeaker !== null) {
+        currentText += " " + cleanText(line);
+      }
+    }
+  });
+
+  if (currentSpeaker !== null) {
+    messages.push({ speaker: currentSpeaker, text: currentText });
+  }
+
+  if (messages.length === 0) {
+    alert("카카오톡 복붙 형식이 맞는지 확인해주세요 🥲");
+    return;
+  }
+
+  render(messages);
+}
+
+function cleanText(text) {
+  // ㅋㅋㅋㅋ / ㅎㅎㅎ / ㅜㅜ / ㅠㅠ 제거
+  text = text.replace(/(ㅋ{2,}|ㅎ{2,}|ㅜ{2,}|ㅠ{2,})/g, "");
+  text = text.replace(/\s+/g, " ").trim();
+  return text;
+}
+
+function render(messages) {
+  const output = document.getElementById("output");
+
+  const pastel = [
+    "#ffd6e8",
+    "#d6e8ff",
+    "#fff0b3",
+    "#d4ffd6",
+    "#f3d6ff",
+    "#ffe0cc"
+  ];
+
+  const speakerColor = {};
+  let colorIndex = 0;
+
+  messages.forEach(msg => {
+
+    if (!speakerColor[msg.speaker]) {
+      speakerColor[msg.speaker] = pastel[colorIndex % pastel.length];
+      colorIndex++;
+    }
+
+    const div = document.createElement("div");
+    div.className = "message";
+    div.style.backgroundColor = speakerColor[msg.speaker];
+    div.innerText = msg.text;
+
+    output.appendChild(div);
+  });
+}
+
+</script>
+
 </body>
 </html>
