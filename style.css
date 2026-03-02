@@ -1,98 +1,115 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #fafafa;
-  color: #333;
+  font-family: 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(180deg, #fff9fc 0%, #ffffff 100%);
+  color: #3a3a3a;
 }
 
 .container {
-  max-width: 600px;
-  margin: 60px auto 0 auto;
-  padding: 20px;
+  max-width: 620px;
+  margin: 80px auto 0 auto;
+  padding: 30px;
   text-align: center;
 }
 
 h1 {
-  margin-bottom: 30px;
+  margin-bottom: 40px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #d85d9f;
+  letter-spacing: 0.5px;
 }
+
+/* 입력창 */
 
 textarea {
   width: 100%;
   height: 180px;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  resize: none;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid #f1d4e3;
+  background: #ffffff;
   font-size: 14px;
+  resize: none;
+  outline: none;
+  transition: 0.2s ease;
 }
 
+textarea:focus {
+  border-color: #e8a8c8;
+  box-shadow: 0 0 0 3px rgba(232, 168, 200, 0.15);
+}
+
+/* 버튼 */
+
 button {
-  margin-top: 15px;
-  padding: 10px 16px;
-  border-radius: 8px;
+  margin-top: 16px;
+  padding: 11px 20px;
+  border-radius: 999px;
   border: none;
   cursor: pointer;
   font-size: 14px;
-  background: #222;
+  font-weight: 600;
+  background: linear-gradient(135deg, #e8a8c8, #d85d9f);
   color: white;
+  transition: all 0.2s ease;
 }
 
 button:hover {
-  opacity: 0.85;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(216, 93, 159, 0.25);
 }
 
 .main-btn {
   width: 100%;
 }
 
+/* 결과 영역 */
+
 #output {
-  margin-top: 30px;
+  margin-top: 40px;
   text-align: left;
 }
 
 .message {
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 10px;
+  padding: 15px;
+  border-radius: 16px;
+  margin-bottom: 14px;
   font-size: 14px;
+  background: #fff;
+  border: 1px solid #f3e2ea;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
 }
+
+/* 결과 버튼 영역 */
 
 #resultActions {
   display: none;
-  margin-top: 20px;
+  margin-top: 28px;
 }
 
-#resultActions button {
-  margin: 8px;
-}
-
-/* ===== 푸터 ===== */
+/* 푸터 */
 
 .footer {
-  margin-top: 80px;
-  padding: 24px 0;
-  border-top: 1px solid #eee;
+  margin-top: 100px;
+  padding: 32px 0;
+  border-top: 1px solid #f2e4ec;
   font-size: 13px;
-  color: #777;
+  color: #b57da0;
   text-align: center;
 }
 
-.footer-inner {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
 .footer a {
-  color: #555;
+  color: #d85d9f;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .footer a:hover {
-  color: #111;
+  opacity: 0.7;
 }
 
 .divider {
   margin: 0 8px;
-  color: #ccc;
+  color: #e4bfd2;
 }
