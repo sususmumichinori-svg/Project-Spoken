@@ -1,11 +1,93 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>대화정리기</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대화정리기</title>
+
+<style>
+body {
+  font-family: sans-serif;
+  background: #fff0f6;
+  margin: 0;
+  padding: 30px;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(255, 150, 200, 0.2);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #ff5fa2;
+}
+
+textarea {
+  width: 100%;
+  height: 180px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #ffd1e8;
+  resize: none;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.options {
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.options label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #ff7eb9;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+button:hover {
+  background: #ff5fa2;
+}
+
+#output {
+  margin-top: 20px;
+  padding: 15px;
+  background: #fff7fb;
+  border-radius: 15px;
+  white-space: pre-wrap;
+  font-size: 14px;
+}
+
+.speaker-0 { color: #ff5fa2; }
+.speaker-1 { color: #7a5fff; }
+.speaker-2 { color: #00a86b; }
+.speaker-3 { color: #ff8c42; }
+
+.version {
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.5;
+  margin-top: 20px;
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
@@ -13,38 +95,15 @@
 
   <textarea id="inputText" placeholder="여기에 대화를 붙여넣으세요"></textarea>
 
-  <!-- 화자 설정 -->
-  <div class="option-group">
-    <div class="option-title">화자 설정</div>
-
-    <label class="toggle">
-      <input type="checkbox" id="showSpeaker" checked>
-      <span>화자 표시</span>
-    </label>
-
-    <label class="toggle sub-option">
-      <input type="checkbox" id="colorSpeaker">
-      <span>화자 색상 구분</span>
-    </label>
-  </div>
-
-  <!-- 정리 옵션 -->
-  <div class="option-group">
-    <div class="option-title">정리 옵션</div>
-
-    <label class="toggle">
-      <input type="checkbox" id="removeTime">
-      <span>시간 제거</span>
-    </label>
-
-    <label class="toggle">
-      <input type="checkbox" id="removeLaugh">
-      <span>ㅋㅋ/ㅎㅎ 제거</span>
-    </label>
+  <div class="options">
+    <label><input type="checkbox" id="removeTime"> 시간 제거</label>
+    <label><input type="checkbox" id="removeLaugh"> ㅋㅋ/ㅎㅎ 제거</label>
+    <label><input type="checkbox" id="colorSpeaker"> 화자 색상 구분</label>
+    <label><input type="checkbox" id="removeSpeaker"> 화자 이름 제거</label>
   </div>
 
   <button onclick="cleanText()">정리하기</button>
-  <button class="sub-btn" onclick="copyText()">결과 복사</button>
+  <button onclick="copyText()">결과 복사</button>
 
   <div id="output"></div>
 
