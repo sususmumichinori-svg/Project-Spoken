@@ -68,3 +68,31 @@ button:hover {
   max-width: 85%;
   box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
+.footer {
+  margin-top: 80px;
+  padding: 24px 0;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+  color: #777;
+}
+
+.footer-inner {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer a {
+  color: #555;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer a:hover {
+  color: #111;
+}
+
+.divider {
+  margin: 0 8px;
+  color: #ccc;
+}
