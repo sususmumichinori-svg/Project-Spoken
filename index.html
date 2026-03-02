@@ -2,9 +2,9 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Spoken Cleaner</title>
-<style>
+<title>대화정리기v1.0:Spoken Cleaner</title>
 
+<style>
 body {
   margin: 0;
   padding: 30px 15px;
@@ -37,7 +37,7 @@ textarea {
 
 button {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 10px;
   padding: 12px;
   border: none;
   border-radius: 20px;
@@ -66,20 +66,20 @@ button:hover {
   max-width: 85%;
   box-shadow: 0 3px 8px rgba(0,0,0,0.08);
 }
-
 </style>
+
 </head>
 <body>
 
 <div class="container">
-  <h1>💗대화정리기-Spoken Cleaner v.1.0.0💗</h1>
-   <h2>입력한 내용은 어디에도 저장되지 않습니다.</h2>
-  
-  <textarea id="inputText" placeholder="카카오톡 대화 복붙"></textarea>
+  <h1>💗 대화정리기 v1.0.0 - Spoken Cleaner 💗</h1>
+
+  <textarea id="inputText" placeholder="카카오톡 대화를 복붙해주세요. 입력하신 내용은 어디에도 저장되지 않습니다. "></textarea>
 
   <button onclick="processText()">정리하기 ✨</button>
   <button onclick="copyText()">복사하기 📋</button>
   <button onclick="downloadTXT()">TXT 내보내기 💾</button>
+
   <div id="output"></div>
 </div>
 
@@ -111,7 +111,6 @@ function processText() {
     if (match) {
       const speaker = match[1];
       let text = match[3] || "";
-
       text = cleanText(text);
 
       if (speaker === currentSpeaker) {
@@ -124,7 +123,7 @@ function processText() {
         currentText = text;
       }
     } else {
-      // 만약 다음 줄에 이어서 메시지가 오는 경우
+      // 다음 줄 이어붙이기 대응
       if (currentSpeaker !== null) {
         currentText += " " + cleanText(line);
       }
@@ -136,7 +135,7 @@ function processText() {
   }
 
   if (messages.length === 0) {
-    alert("카카오톡 복붙 형식이 맞는지 확인해주세요 🥲");
+    alert("카카오톡 형식이 맞는지 확인해주세요 🥲");
     return;
   }
 
@@ -144,7 +143,6 @@ function processText() {
 }
 
 function cleanText(text) {
-  // ㅋㅋㅋㅋ / ㅎㅎㅎ / ㅜㅜ / ㅠㅠ 제거
   text = text.replace(/(ㅋ{2,}|ㅎ{2,}|ㅜ{2,}|ㅠ{2,})/g, "");
   text = text.replace(/\s+/g, " ").trim();
   return text;
@@ -181,8 +179,50 @@ function render(messages) {
   });
 }
 
+function getCleanText() {
+  const messages = document.querySelectorAll(".message");
+  let result = "";
+
+  messages.forEach(msg => {
+    result += msg.innerText + "\n\n";
+  });
+
+  return result.trim();
+}
+
+function copyText() {
+  const text = getCleanText();
+
+  if (!text) {
+    alert("복사할 내용이 없어요 🥲");
+    return;
+  }
+
+  navigator.clipboard.writeText(text)
+    .then(() => alert("복사 완료 💗"))
+    .catch(() => alert("복사 실패 😢"));
+}
+
+function downloadTXT() {
+  const text = getCleanText();
+
+  if (!text) {
+    alert("내보낼 내용이 없어요 🥲");
+    return;
+  }
+
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "spoken-cleaned.txt";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
 </script>
 
 </body>
 </html>
-
