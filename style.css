@@ -113,3 +113,35 @@ button:hover {
   margin: 0 8px;
   color: #e4bfd2;
 }
+
+/* 버전 */
+
+.version {
+  font-size: 12px;
+  color: #c8a6b8;
+  margin-top: -25px;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+/* 소개문 */
+
+.intro {
+  font-size: 14px;
+  color: #7a6a75;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* 보안 안내 */
+
+.privacy-note {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #9b7f8f;
+  background: #fff6fb;
+  border: 1px solid #f1d4e3;
+  padding: 12px 16px;
+  border-radius: 14px;
+  line-height: 1.6;
+}
