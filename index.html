@@ -9,18 +9,35 @@
 <body>
 
   <div class="container">
-    <h1>💗Spoken Cleaner💗</h1>
+    <h1>Spoken Cleaner</h1>
+    <div class="version">v1.0.0</div>
 
-    <textarea id="inputText" placeholder="카카오톡 대화를 복붙하세요.대화내용은 어디에도 저장되지 않습니다."></textarea>
+    <!-- 간단한 소개 -->
+    <div class="intro">
+      대화를 정리해주는 작은 툴입니다.  
+      카카오톡 대화를 붙여넣으면 화자별로 깔끔하게 정리해드립니다.
+    </div>
 
-    <button class="main-btn" onclick="processText()">정리하기✨</button>
+    <textarea 
+      id="inputText" 
+      placeholder="카카오톡 대화를 복사해서 붙여넣으세요.">
+    </textarea>
+
+    <!-- 보안 안내 -->
+    <div class="privacy-note">
+      🔒 이 도구는 서버와 통신하지 않습니다.  
+      입력한 대화 내용은 어디에도 저장되지 않으며  
+      모든 처리는 사용자의 브라우저 내에서만 이루어집니다.
+    </div>
+
+    <button class="main-btn" onclick="processText()">정리하기 ✨</button>
 
     <div id="output"></div>
 
     <!-- 결과 버튼 (처음엔 숨김) -->
     <div id="resultActions">
-      <button onclick="copyText()">복사하기📋</button>
-      <button onclick="downloadTXT()">TXT 내보내기💾</button>
+      <button onclick="copyText()">복사하기 📋</button>
+      <button onclick="downloadTXT()">TXT 내보내기 💾</button>
     </div>
   </div>
 
@@ -31,14 +48,13 @@
       <span class="divider">·</span>
       <span>Built by SHOKOLABO</span>
       <span class="divider">·</span>
-      <a href="https://x.com/studymirae" target="studymirae">𝕏</a>
+      <a href="https://x.com/studymirae" target="_blank">𝕏</a>
     </div>
   </footer>
 
   <script src="script.js"></script>
 </body>
 </html>
-
 
 
 
