@@ -24,6 +24,7 @@ h1 {
 
 textarea {
   width: 100%;
+  box-sizing: border-box;
   height: 180px;
   padding: 16px;
   border-radius: 14px;
