@@ -1,62 +1,314 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FKD73ZKDL8"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+// ─────────────────────────────────────────────
+//  형식 감지
+// ─────────────────────────────────────────────
 
-  gtag('config', 'G-FKD73ZKDL8');
-</script>
-  <meta charset="UTF-8">
-  <title>Spoken Cleaner</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-</head>
+function detectFormat(input) {
+  const lines = input.split("\n").map(l => l.trim()).filter(Boolean);
 
-<body>
+  if (/^.+님과 카카오톡 대화/.test(lines[0])) return "kakao_export";
 
-  <div class="container">
-    <h1>Spoken Cleaner🧹</h1>
-    <div class="version">v1.1.1
-    </div>
+  const kakaoPattern      = /^\[.+?\]\s\[.+?\]/;
+  // 오전/오후 필수로 명시 — "PM 10:48" 같은 영문 시간 형식이 오탐되는 것 방지
+  const discordPattern    = /^.+\s?[—–-]\s?(?:오전|오후)\s?\d{1,2}:\d{2}/;
+  const discordLogPattern = /^\[(?:오전|오후)\s?\d{1,2}:\d{2}\]\s.+?:/;
 
-    <div class="intro">
-      카카오톡/디스코드 대화를 붙여넣으면 화자별로 깔끔하게 정리해드립니다.<br/> 
-    </div>
+  let kakaoCount = 0;
+  let discordCount = 0;
 
-    <textarea 
-      id="inputText" 
-      placeholder="카카오톡/디스코드 대화를 복사해서 붙여넣으세요."></textarea>
+  for (const line of lines) {
+    if (kakaoPattern.test(line)) kakaoCount++;
+    if (discordPattern.test(line) || discordLogPattern.test(line)) discordCount++;
+  }
 
-    <div class="privacy-note">
-      🔒 이 도구는 서버와 통신하지 않습니다.<br/> 
-      입력한 대화 내용은 어디에도 저장되지 않으며<br/> 
-      모든 처리는 사용자의 브라우저 내에서만 이루어집니다.<br/> 
-    </div>
+  if (kakaoCount >= discordCount && kakaoCount > 0) return "kakao";
+  if (discordCount > 0) return "discord";
+  return "unknown";
+}
 
-    <button class="main-btn" onclick="processText()">정리하기 ✨</button>
+// ─────────────────────────────────────────────
+//  카카오톡 일반 복붙 파서
+// ─────────────────────────────────────────────
 
-    <div id="output"></div>
+function parseKakao(lines) {
+  let messages = [];
+  let currentSpeaker = null;
+  let currentText = "";
 
-    <div id="resultActions">
-      <button onclick="copyText()">복사하기 📋</button>
-      <button onclick="downloadTXT()">TXT 내보내기 💾</button>
-    </div>
-  </div>
+  lines.forEach(line => {
+    line = line.trim();
+    if (!line) return;
 
-  <footer class="footer">
-    <div class="footer-inner">
-      <span>© 2026 Spoken Cleaner</span>
-      <span class="divider">·</span>
-      <span>Built by MIRAE</span>
-      <span class="divider">·</span>
-      <a href="https://x.com/studymirae" target="_blank">문의하기: 𝕏(구 트위터)</a>
-    </div>
-  </footer>
+    const match = line.match(/^\[(.+?)\]\s\[.+?\]\s?(.*)$/);
 
-  <script src="script.js"></script>
-</body>
-</html>
+    if (match) {
+      const speaker = match[1];
+      let text = cleanText(match[2] || "");
+
+      if (speaker === currentSpeaker) {
+        if (text) currentText += " " + text;
+      } else {
+        if (currentSpeaker !== null) {
+          messages.push({ speaker: currentSpeaker, text: currentText.trim() });
+        }
+        currentSpeaker = speaker;
+        currentText = text;
+      }
+    } else {
+      if (currentSpeaker !== null) {
+        const cleaned = cleanText(line);
+        if (cleaned) currentText += " " + cleaned;
+      }
+    }
+  });
+
+  if (currentSpeaker !== null && currentText.trim()) {
+    messages.push({ speaker: currentSpeaker, text: currentText.trim() });
+  }
+
+  return messages;
+}
+
+// ─────────────────────────────────────────────
+//  카카오톡 텍스트 내보내기 파서
+// ─────────────────────────────────────────────
+
+function parseKakaoExport(lines) {
+  let messages = [];
+  let currentSpeaker = null;
+  let currentText = "";
+
+  const skipPatterns = [
+    /^.+님과 카카오톡 대화$/,
+    /^저장한 날짜\s*:/,
+    /^-{3,}.+-{3,}$/,
+    /^사진$/, /^이모티콘$/, /^동영상$/, /^파일$/, /^연락처$/, /^지도$/,
+  ];
+
+  const msgPattern = /^\[(.+?)\]\s\[.+?\]\s?(.*)$/;
+
+  lines.forEach(line => {
+    line = line.trim();
+    if (!line) return;
+    if (skipPatterns.some(p => p.test(line))) return;
+
+    const match = line.match(msgPattern);
+
+    if (match) {
+      const speaker = match[1];
+      const text = cleanText(match[2] || "");
+
+      if (speaker === currentSpeaker) {
+        if (text) currentText += " " + text;
+      } else {
+        if (currentSpeaker !== null && currentText.trim()) {
+          messages.push({ speaker: currentSpeaker, text: currentText.trim() });
+        }
+        currentSpeaker = speaker;
+        currentText = text;
+      }
+    } else {
+      if (currentSpeaker !== null) {
+        const cleaned = cleanText(line);
+        if (cleaned) currentText += " " + cleaned;
+      }
+    }
+  });
+
+  if (currentSpeaker !== null && currentText.trim()) {
+    messages.push({ speaker: currentSpeaker, text: currentText.trim() });
+  }
+
+  return messages;
+}
+
+// ─────────────────────────────────────────────
+//  디스코드 UI 노이즈 제거
+// ─────────────────────────────────────────────
+
+function isDiscordNoise(line) {
+  if (/^(클릭해서 반응|반응 추가하기|수정|전달|기타|답장)$/.test(line)) return true;
+  if (/^:[a-zA-Z0-9_]+:$/.test(line)) return true;
+  if (/^\d{4}년 \d{1,2}월 \d{1,2}일 .+\d{1,2}:\d{2}$/.test(line)) return true;
+  if (/^\d{4}\.\s?\d{1,2}\.\s?\d{1,2}\. .+\d{1,2}:\d{2}$/.test(line)) return true;
+  if (/이 서버에 참가했습니다|님이 입장|님이 퇴장|메시지를 고정/.test(line)) return true;
+  if (/^@.+/.test(line)) return true;
+  return false;
+}
+
+// ─────────────────────────────────────────────
+//  디스코드 파서
+// ─────────────────────────────────────────────
+
+function parseDiscord(lines) {
+  let messages = [];
+  let currentSpeaker = null;
+  let currentText = "";
+
+  const headerPattern = /^(.+?)\s?[—–-]\s?(?:\d{4}\.\s?\d{1,2}\.\s?\d{1,2}\.)?\s*(?:오전|오후)\s?\d{1,2}:\d{2}/;
+  const logPattern    = /^\[(?:오전|오후)\s?\d{1,2}:\d{2}\]\s(.+?):\s(.*)$/;
+  const timestampOnly = /^\[(?:오전|오후)\s?\d{1,2}:\d{2}\]/;
+
+  lines.forEach(line => {
+    line = line.trim();
+    if (!line) return;
+
+    if (isDiscordNoise(line)) return;
+    if (timestampOnly.test(line)) return;
+
+    const headerMatch = line.match(headerPattern);
+    const logMatch    = line.match(logPattern);
+
+    if (headerMatch) {
+      if (currentSpeaker !== null && currentText.trim()) {
+        messages.push({ speaker: currentSpeaker, text: currentText.trim() });
+      }
+      currentSpeaker = headerMatch[1].trim();
+      currentText = "";
+
+    } else if (logMatch) {
+      const speaker = logMatch[1].trim();
+      const text    = cleanText(logMatch[2] || "");
+
+      if (speaker === currentSpeaker) {
+        if (text) currentText += " " + text;
+      } else {
+        if (currentSpeaker !== null && currentText.trim()) {
+          messages.push({ speaker: currentSpeaker, text: currentText.trim() });
+        }
+        currentSpeaker = speaker;
+        currentText = text;
+      }
+
+    } else {
+      if (currentSpeaker !== null) {
+        const cleaned = cleanText(line);
+        if (cleaned) currentText += (currentText ? " " : "") + cleaned;
+      }
+    }
+  });
+
+  if (currentSpeaker !== null && currentText.trim()) {
+    messages.push({ speaker: currentSpeaker, text: currentText.trim() });
+  }
+
+  return messages;
+}
+
+// ─────────────────────────────────────────────
+//  공통 텍스트 클리닝
+// ─────────────────────────────────────────────
+
+function cleanText(text) {
+  text = text.replace(/(ㅋ{2,}|ㅎ{2,}|ㅜ{2,}|ㅠ{2,})/g, "");
+  text = text.replace(/:[a-zA-Z0-9_]+:/g, "");
+  text = text.replace(/\s+/g, " ").trim();
+  return text;
+}
+
+// ─────────────────────────────────────────────
+//  메인 처리 함수
+// ─────────────────────────────────────────────
+
+function processText() {
+  const inputEl  = document.getElementById("inputText");
+  const outputEl = document.getElementById("output");
+  const actionEl = document.getElementById("resultActions");
+
+  outputEl.innerHTML = "";
+  actionEl.style.display = "none";
+
+  const input = inputEl.value.trim();
+  if (!input) {
+    alert("대화를 붙여넣어주세요 💬");
+    return;
+  }
+
+  const lines  = input.split("\n");
+  const format = detectFormat(input);
+
+  let messages = [];
+
+  if (format === "kakao") {
+    messages = parseKakao(lines);
+  } else if (format === "kakao_export") {
+    messages = parseKakaoExport(lines);
+  } else if (format === "discord") {
+    messages = parseDiscord(lines);
+  } else {
+    alert("지원하는 형식을 찾지 못했어요.\n카카오톡 또는 디스코드 대화를 붙여넣어주세요 🥲");
+    return;
+  }
+
+  if (messages.length === 0) {
+    alert("대화 내용을 파싱하지 못했어요. 형식을 확인해주세요 🥲");
+    return;
+  }
+
+  render(messages, format);
+  actionEl.style.display = "block";
+}
+
+// ─────────────────────────────────────────────
+//  렌더링
+// ─────────────────────────────────────────────
+
+function render(messages, format) {
+  const outputEl = document.getElementById("output");
+
+  const pastelColors  = ["#ffd6e8", "#d6e8ff", "#fff0b3", "#d4ffd6", "#f3d6ff", "#ffe0cc"];
+  const discordColors = ["#d6e4ff", "#e8d6ff", "#d6fff0", "#fff5d6", "#ffd6d6", "#d6f0ff"];
+
+  const palette = format === "discord" ? discordColors : pastelColors;
+  const speakerColorMap = {};
+  let colorIndex = 0;
+
+  messages.forEach(msg => {
+    if (!speakerColorMap[msg.speaker]) {
+      speakerColorMap[msg.speaker] = palette[colorIndex % palette.length];
+      colorIndex++;
+    }
+
+    const div = document.createElement("div");
+    div.className = "message";
+    div.style.backgroundColor = speakerColorMap[msg.speaker];
+    div.innerText = msg.text;
+
+    outputEl.appendChild(div);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  복사 / 내보내기
+// ─────────────────────────────────────────────
+
+function getCleanText() {
+  const messageEls = document.querySelectorAll(".message");
+  let result = "";
+  messageEls.forEach(el => {
+    result += el.innerText + "\n\n";
+  });
+  return result.trim();
+}
+
+function copyText() {
+  const text = getCleanText();
+  if (!text) return alert("복사할 내용이 없어요 🥲");
+  navigator.clipboard.writeText(text)
+    .then(() => alert("복사 완료 💗"))
+    .catch(() => alert("복사 실패 😢"));
+}
+
+function downloadTXT() {
+  const text = getCleanText();
+  if (!text) return alert("내보낼 내용이 없어요 🥲");
+
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url;
+  a.download = "spoken-cleaned.txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
