@@ -1,39 +1,30 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FKD73ZKDL8"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-FKD73ZKDL8');
-</script>
   <meta charset="UTF-8">
   <title>Spoken Cleaner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
   <div class="container">
-    <h1>Spoken Cleaner🧹</h1>
-    <div class="version">v1.1.1</div>
+    <h1>Spoken Cleaner</h1>
+    <div class="version">v1.2.0</div>
 
     <div class="intro">
-      카카오톡/디스코드 대화를 붙여넣으면 화자별로 깔끔하게 정리해드립니다.<br/> 
+      대화를 정리해주는 작은 툴입니다. <br/>
+      카카오톡·디스코드 대화를 붙여넣으면 화자별로 깔끔하게 정리해드립니다.<br/>
     </div>
 
-    <textarea 
-      id="inputText" 
-      placeholder="카카오톡/디스코드 대화를 복사해서 붙여넣으세요."></textarea>
+    <textarea
+      id="inputText"
+      placeholder="카카오톡 또는 디스코드 대화를 복사해서 붙여넣으세요."></textarea>
 
     <div class="privacy-note">
-      🔒 이 도구는 서버와 통신하지 않습니다.<br/> 
-      입력한 대화 내용은 어디에도 저장되지 않으며<br/> 
-      모든 처리는 사용자의 브라우저 내에서만 이루어집니다.<br/> 
+      🔒 이 도구는 서버와 통신하지 않습니다.<br/>
+      입력한 대화 내용은 어디에도 저장되지 않으며<br/>
+      모든 처리는 사용자의 브라우저 내에서만 이루어집니다.<br/>
     </div>
 
     <button class="main-btn" onclick="processText()">정리하기 ✨</button>
@@ -44,19 +35,71 @@
       <button onclick="copyText()">복사하기 📋</button>
       <button onclick="downloadTXT()">TXT 내보내기 💾</button>
     </div>
+
+    <!-- 업데이트 내역 -->
+    <div class="changelog">
+      <button class="changelog-toggle" onclick="toggleChangelog()">
+        업데이트 내역 <span id="changelogArrow">▾</span>
+      </button>
+      <div class="changelog-body" id="changelogBody">
+        <ul>
+          <li><span class="tag">v1.2.0</span> 업데이트 내역 · 오류 신고 기능 추가</li>
+          <li><span class="tag">v1.1.2</span> 이메일 전달 대화 형식 오탐 버그 수정</li>
+          <li><span class="tag">v1.1.1</span> 이모지 닉네임 · 날짜 형식(2025. 4. 15.) 버그 수정</li>
+          <li><span class="tag">v1.1.0</span> 디스코드 형식 · 카카오톡 텍스트 내보내기 지원</li>
+          <li><span class="tag">v1.0.0</span> 카카오톡 대화 정리 첫 출시</li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 
+  <!-- 푸터 -->
   <footer class="footer">
     <div class="footer-inner">
       <span>© 2026 Spoken Cleaner</span>
       <span class="divider">·</span>
-      <span>Built by MIRAE</span>
+      <span>Built by SHOKOLABO</span>
       <span class="divider">·</span>
-      <a href="https://x.com/studymirae" target="_blank">문의하기: 𝕏(구 트위터)</a>
+      <a href="https://x.com/studymirae" target="_blank">𝕏</a>
+      <span class="divider">·</span>
+      <a href="#" onclick="openBugReport(event)">오류 신고 🐛</a>
     </div>
   </footer>
 
   <script src="script.js"></script>
+  <script>
+    function toggleChangelog() {
+      const body = document.getElementById("changelogBody");
+      const arrow = document.getElementById("changelogArrow");
+      const isOpen = body.classList.toggle("open");
+      arrow.textContent = isOpen ? "▴" : "▾";
+    }
+
+    function openBugReport(e) {
+      e.preventDefault();
+      const subject = encodeURIComponent("[Spoken Cleaner] 오류 신고");
+      const body = encodeURIComponent(
+`안녕하세요, Spoken Cleaner 오류 신고입니다.
+
+───────────────────
+📌 오류 내용
+(어떤 문제가 발생했는지 간단히 설명해주세요)
+
+
+📎 대화 원문 첨부 안내
+오류가 난 대화를 수정하지 말고 그대로 .txt 파일로 저장해서 첨부해주시면 빠르게 확인할 수 있어요.
+
+📱 사용 환경
+- 플랫폼: 카카오톡 / 디스코드 (해당 항목 남겨주세요)
+- 브라우저:
+- 기기:
+───────────────────
+
+감사합니다 🩷`
+      );
+      window.location.href = `mailto:suchacc1227@gmail.com?subject=${subject}&body=${body}`;
+    }
+  </script>
 </body>
 </html>
-
