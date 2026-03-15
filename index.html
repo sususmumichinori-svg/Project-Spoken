@@ -69,7 +69,7 @@
     </div>
   </footer>
 
-  <!-- 오류 신고 모달 -->
+  <!-- 오류 신고 모달 (body 직속) -->
   <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal()"></div>
   <div class="modal" id="bugModal">
     <div class="modal-header">
@@ -108,6 +108,12 @@
 
   <script src="script.js"></script>
   <script>
+    // 페이지 로드 시 모달을 body 직속으로 이동
+    document.addEventListener("DOMContentLoaded", function () {
+      document.body.appendChild(document.getElementById("modalBackdrop"));
+      document.body.appendChild(document.getElementById("bugModal"));
+    });
+
     function toggleChangelog() {
       const body = document.getElementById("changelogBody");
       const arrow = document.getElementById("changelogArrow");
