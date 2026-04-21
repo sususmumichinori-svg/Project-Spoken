@@ -1,8 +1,6 @@
 # Project-Spoken # SPOKEN
 Chat log organizer that converts messy conversations into clean speech bubbles.<br/>
 
-SHOKOLABO 첫번째 프로젝트
-
 복잡한 채팅 로그를 읽기 좋은 대화 형태로 정리해주는 웹 도구입니다.
 불필요한 요소를 제거하고,
 말풍선 형식으로 보기 좋게 정돈해줍니다. <br/>
