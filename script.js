@@ -8,8 +8,7 @@ function detectFormat(input) {
   if (/^.+님과 카카오톡 대화/.test(lines[0])) return "kakao_export";
 
   const kakaoPattern      = /^\[.+?\]\s\[.+?\]/;
-  // 오전/오후 필수로 명시 — "PM 10:48" 같은 영문 시간 형식이 오탐되는 것 방지
-  const discordPattern    = /^.+\s?[—–-]\s?(?:오전|오후)\s?\d{1,2}:\d{2}/;
+  const discordPattern    = /^.+\s?[—–-]|(?:&#8212;)\s?(?:오전|오후)\s?\d{1,2}:\d{2}/;
   const discordLogPattern = /^\[(?:오전|오후)\s?\d{1,2}:\d{2}\]\s.+?:/;
 
   let kakaoCount = 0;
@@ -23,6 +22,16 @@ function detectFormat(input) {
   if (kakaoCount >= discordCount && kakaoCount > 0) return "kakao";
   if (discordCount > 0) return "discord";
   return "unknown";
+}
+
+// ─────────────────────────────────────────────
+//  HTML 엔티티 디코딩
+// ─────────────────────────────────────────────
+
+function decodeEntities(text) {
+  const decoder = document.createElement("textarea");
+  decoder.innerHTML = text;
+  return decoder.value;
 }
 
 // ─────────────────────────────────────────────
@@ -130,6 +139,7 @@ function isDiscordNoise(line) {
   if (/^:[a-zA-Z0-9_]+:$/.test(line)) return true;
   if (/^\d{4}년 \d{1,2}월 \d{1,2}일 .+\d{1,2}:\d{2}$/.test(line)) return true;
   if (/^\d{4}\.\s?\d{1,2}\.\s?\d{1,2}\. .+\d{1,2}:\d{2}$/.test(line)) return true;
+  if (/^\d{4}-\d{1,2}-\d{1,2} .+\d{1,2}:\d{2}$/.test(line)) return true;
   if (/이 서버에 참가했습니다|님이 입장|님이 퇴장|메시지를 고정/.test(line)) return true;
   if (/^@.+/.test(line)) return true;
   return false;
@@ -144,7 +154,7 @@ function parseDiscord(lines) {
   let currentSpeaker = null;
   let currentText = "";
 
-  const headerPattern = /^(.+?)\s?[—–-]\s?(?:\d{4}\.\s?\d{1,2}\.\s?\d{1,2}\.)?\s*(?:오전|오후)\s?\d{1,2}:\d{2}/;
+  const headerPattern = /^(.+?)\s?[—–-]\s?(?:\d{4}[-/.]\s?\d{1,2}[-/.]\s?\d{1,2}\.?)?\s*(?:오전|오후)\s?\d{1,2}:\d{2}/;
   const logPattern    = /^\[(?:오전|오후)\s?\d{1,2}:\d{2}\]\s(.+?):\s(.*)$/;
   const timestampOnly = /^\[(?:오전|오후)\s?\d{1,2}:\d{2}\]/;
 
@@ -217,11 +227,14 @@ function processText() {
   outputEl.innerHTML = "";
   actionEl.style.display = "none";
 
-  const input = inputEl.value.trim();
+  let input = inputEl.value.trim();
   if (!input) {
     alert("대화를 붙여넣어주세요 💬");
     return;
   }
+
+  // HTML 엔티티 디코딩 (&#8212; → — 등)
+  input = decodeEntities(input);
 
   const lines  = input.split("\n");
   const format = detectFormat(input);
